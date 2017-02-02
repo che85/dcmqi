@@ -6,8 +6,6 @@ define(['ajv', 'dicomParser'], function (Ajv, dicomParser) {
   var examplesURL = idRoot + 'examples/';
 
   var commonSchemaURL = schemasURL + 'common-schema.json';
-  var srCommonSchemaURL = schemasURL + 'sr-common-schema.json';
-  var segContextCommonSchemaURL = schemasURL + 'segment-context-common-schema.json';
 
   var segSchemaFilename = 'seg-schema.json';
   var srSchemaFilename = 'sr-tid1500-schema.json';
@@ -119,7 +117,6 @@ define(['ajv', 'dicomParser'], function (Ajv, dicomParser) {
           useDefaults: true,
           allErrors: true,
           loadSchema: loadSchema });
-
         loadMainSchema();
       };
 
@@ -138,74 +135,27 @@ define(['ajv', 'dicomParser'], function (Ajv, dicomParser) {
           if (body != undefined) {
             console.log("loading schema: " + $scope.schema.url);
             ajv.addSchema(body.data);
-
-            // console.log(body.data)
-            var references = findReferences(body.data).filter(function (x, i, a) {
-              return a.indexOf(x) == i;
+            ajv.compileAsync({$ref: $scope.schema.id, $async: true}, function (err, validate) {
+              if (err) {
+                $scope.output = err.message;
+                return;
+              } else {
+                schemaLoaded = true;
+                $scope.onOutputChanged();
+                $scope.examples = $scope.schema.examples;
+                if($scope.examples != undefined) {
+                  $scope.example = $scope.examples[0];
+                  $scope.onExampleSelected();
+                } else {
+                  $scope.example = undefined;
+                  $scope.exampleJson = "";
+                  $scope.showExample = false;
+                }
+              }
             });
-            console.log("found references for selected schema: " + references);
-
-            loadReferences(references, onFinishedLoadingReferences);
             $scope.schemaJson = JSON.stringify(body.data, null, 2);
           }
         });
-      }
-
-      function onFinishedLoadingReferences() {
-        console.log("all references are loaded");
-        schemaLoaded = true;
-        validate = ajv.compile({$ref: $scope.schema.id});
-        $scope.onOutputChanged();
-        $scope.examples = $scope.schema.examples;
-        if($scope.examples != undefined) {
-          $scope.example = $scope.examples[0];
-          $scope.onExampleSelected();
-        } else {
-          $scope.example = undefined;
-          $scope.exampleJson = "";
-          $scope.showExample = false;
-        }
-      }
-
-      function loadReferences(references, callback) {
-        var numLoadedReferences = 0;
-        var loadedReferences = [];
-        angular.forEach(references, function(value, key) {
-          loadSchema(value, function(err, body) {
-            if (body != undefined) {
-              console.log("loading reference: " + value);
-              ajv.addSchema(body.data);
-
-              loadedReferences.push(value);
-              var subReferences = findReferences(body);
-
-              numLoadedReferences += 1;
-              console.log("number of references: " + numLoadedReferences);
-              if (numLoadedReferences == references.length) {
-                callback();
-              }
-            }
-          });
-        });
-      }
-
-      function findReferences(jsonObject) {
-        // http://stackoverflow.com/questions/921789/how-to-loop-through-plain-javascript-object-with-objects-as-members
-        var references = [];
-        for (var key in jsonObject) {
-          if (!jsonObject.hasOwnProperty(key)) continue;
-          var obj = jsonObject[key];
-          if (key == "$ref") {
-            var reference = obj.substring(0, obj.indexOf('#'));
-            if(reference.length > 0)
-              references.push(reference);
-            continue;
-          }
-          if (typeof obj== 'object' && obj!= null) {
-            references = references.concat(findReferences(obj));
-          }
-        }
-        return references;
       }
 
       function loadSchema(uri, callback) {
@@ -228,8 +178,9 @@ define(['ajv', 'dicomParser'], function (Ajv, dicomParser) {
               $scope.output = "Schema for validation was not loaded.";
             } else {
               $scope.input = JSON.stringify(parsedJSON, null, 2);
+              validate = ajv.compile({$ref: $scope.schema.id});
               if (validate(parsedJSON)) {
-                message = "Json input is valid.";
+                  message = "Json input is valid.";
               } else {
                 message = "";
                 angular.forEach(validate.errors, function (value, key) {
@@ -243,7 +194,6 @@ define(['ajv', 'dicomParser'], function (Ajv, dicomParser) {
         }
         $scope.output = message;
       };
-
       $scope.onSchemaSelected();
   }]);
 
