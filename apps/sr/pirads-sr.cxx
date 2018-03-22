@@ -20,6 +20,7 @@
 #include "dcmqi/QIICRUIDs.h"
 #include "dcmqi/internal/VersionConfigure.h"
 #include "dcmqi/Helper.h"
+#include "dcmqi/TIDQIICRXReader.h"
 
 #include <json/json.h>
 
@@ -32,7 +33,7 @@ int main(int argc, char** argv){
 
   if(inputDICOM.size()) {
     // read DICOM, write JSON
-    /*
+
     if(!metaDataFileName.size()){
       std::cerr << "Error: output metadata file is required when input is a DICOM file!" << std::endl;
       return -1;
@@ -45,11 +46,17 @@ int main(int argc, char** argv){
     DSRDocument doc;
     if(doc.read(dataset).good()){
       Json::Value metaRoot;
-      DSRDocumentTree &st = doc.getTree();
+      TIDQIICRXReader reader(doc.getTree());
+      metaRoot["imageLibrary"] = reader.getImageLibrary();
 
-
+      ofstream outputFile;
+      outputFile.open(metaDataFileName.c_str());
+      outputFile << metaRoot;
+    } else {
+      std::cerr << "Error: Failed to read input DICOM document" << std::endl;
     }
-    */
+
+    return 0;
   } else {
     if(!compositeContextDataDir.size() ||
      !metaDataFileName.size() ||

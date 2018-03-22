@@ -20,6 +20,7 @@ set(HDRS
   ${INCLUDE_DIR}/SegmentAttributes.h
   ${INCLUDE_DIR}/TID1500Reader.h
   ${INCLUDE_DIR}/tidqiicrx.h
+  ${INCLUDE_DIR}/TIDQIICRXReader.h
   )
 
 set(SRCS
@@ -33,6 +34,7 @@ set(SRCS
   SegmentAttributes.cpp
   TID1500Reader.cpp
   tidqiicrx.cc
+  TIDQIICRXReader.cpp
   )
 
 
