@@ -35,6 +35,14 @@ SEMMacroBuildCLI(
   EXECUTABLE_ONLY
   )
 
+#include_directories(${CMAKE_CURRENT_SOURCE_DIR}/dcmtkplus)
+SEMMacroBuildCLI(
+  NAME pirads-sr
+  TARGET_LIBRARIES dcmqi
+  #ADDITIONAL_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/dcmtkplus/tidqiicrx.cc
+  EXECUTABLE_ONLY
+  )
+
 #-----------------------------------------------------------------------------
 if(BUILD_TESTING)
   add_subdirectory(Testing)

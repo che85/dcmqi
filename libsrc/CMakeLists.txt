@@ -19,6 +19,7 @@ set(HDRS
   ${INCLUDE_DIR}/JSONSegmentationMetaInformationHandler.h
   ${INCLUDE_DIR}/SegmentAttributes.h
   ${INCLUDE_DIR}/TID1500Reader.h
+  ${INCLUDE_DIR}/tidqiicrx.h
   )
 
 set(SRCS
@@ -31,6 +32,7 @@ set(SRCS
   JSONSegmentationMetaInformationHandler.cpp
   SegmentAttributes.cpp
   TID1500Reader.cpp
+  tidqiicrx.cc
   )
 
 
