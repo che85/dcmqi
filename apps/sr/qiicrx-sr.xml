@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <executable>
   <category>Informatics</category>
-  <title>PI-RADS report generator</title>
-  <description>This tool can be used to save measurements calculated from the image over a volume defined by image segmentation into a DICOM Structured Report that follows [template TID1500](http://dicom.nema.org/medical/dicom/current/output/chtml/part16/chapter_A.html#sect_TID_1500).</description>
+  <title>QIICRX report generator</title>
+  <description>This is a development project support tool not intended for public consumption.</description>
   <version>0.0.0.0.0.beta</version>
   <documentation-url>https://github.com/QIICR/dcmqi</documentation-url>
   <license></license>
