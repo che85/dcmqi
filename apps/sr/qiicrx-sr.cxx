@@ -26,7 +26,7 @@
 
 #include <dcmqi/tidqiicrx.h>
 
-#include "pirads-srCLP.h"
+#include "qiicrx-srCLP.h"
 
 int main(int argc, char** argv){
   PARSE_ARGS;
