@@ -37,7 +37,7 @@ SEMMacroBuildCLI(
 
 #include_directories(${CMAKE_CURRENT_SOURCE_DIR}/dcmtkplus)
 SEMMacroBuildCLI(
-  NAME pirads-sr
+  NAME qiicrx-sr
   TARGET_LIBRARIES dcmqi
   #ADDITIONAL_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/dcmtkplus/tidqiicrx.cc
   EXECUTABLE_ONLY
