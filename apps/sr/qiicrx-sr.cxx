@@ -89,27 +89,43 @@ int main(int argc, char** argv){
   if(metaRoot.isMember("imageLibrary")){
     // each entry in imageLibrary corresponds to an individual series used in PI-RADS
     //  interpretation. For each entry, it is expected that there are "piradsSeriesType" and
-    //  "inputDICOMDirectory" attributes defined.
+    //  ("inputDICOMDirectory" or "inputDICOMFiles") attributes defined.
     for(Json::ArrayIndex i=0;i<metaRoot["imageLibrary"].size();i++){
 
       DcmFileFormat ff;
       OFString dicomFilePath;
       OFList<OFString> fileList;
-      OFString seriesDir;
 
       Json::Value libraryItem = metaRoot["imageLibrary"][i];
 
-      OFStandard::combineDirAndFilename(seriesDir,imageLibraryDataDir.c_str(),libraryItem["inputDICOMDirectory"].asCString());
+      if (libraryItem.isMember("inputDICOMDirectory")) {
+        OFString seriesDir;
+        OFStandard::combineDirAndFilename(seriesDir, imageLibraryDataDir.c_str(),
+                                          libraryItem["inputDICOMDirectory"].asCString());
 
-      OFStandard::searchDirectoryRecursively(seriesDir,fileList,"","",OFFalse);
-      // for each item identified, add it to a separate imageLibrary group
+        OFStandard::searchDirectoryRecursively(seriesDir, fileList, "", "", OFFalse);
+        // for each item identified, add it to a separate imageLibrary group
+
+      } else if (libraryItem.isMember("inputDICOMFiles")) {
+        Json::Value inputDICOMFiles = libraryItem["inputDICOMFiles"];
+        for (Json::Value::ArrayIndex j=0; j!=inputDICOMFiles.size(); j++) {
+          OFString absFilepath;
+          OFStandard::combineDirAndFilename(absFilepath, imageLibraryDataDir.c_str(),
+                                            inputDICOMFiles[j].asCString());
+          fileList.push_back(absFilepath);
+        }
+      } else {
+        cerr << "Error: inputDICOMDirectory or inputDICOMFiles found in imageLibrary group" << endl;
+        return EXIT_FAILURE;
+      }
+
       CHECK_COND(report.getImageLibrary().addImageGroup());
-      while(!fileList.empty()){
+      while (!fileList.empty()) {
         OFString imageLibraryItemFile = fileList.front();
         fileList.pop_front();
         CHECK_COND(ff.loadFile(imageLibraryItemFile));
         CHECK_COND(report.getImageLibrary().addImageEntry(*ff.getDataset(),
-          TID1600_ImageLibrary::withAllDescriptors));
+                                                          TID1600_ImageLibrary::withAllDescriptors));
       }
       // factor out common attributes of the individual entries up to the group level
       CHECK_COND(report.getImageLibrary().moveCommonImageDescriptorsToImageGroups());
@@ -136,7 +152,8 @@ int main(int argc, char** argv){
     unsigned cnt = 0;
     while(nnid){
       Json::Value libraryItem = metaRoot["imageLibrary"][cnt];
-      CHECK_COND(st.addContentItem(DSRTypes::RT_hasAcqContext, DSRTypes::VT_Code, DSRCodedEntryValue("991000","99QIICR","Prostate mpMRI acquisition type"), OFTrue));
+      CHECK_COND(st.addContentItem(DSRTypes::RT_hasAcqContext, DSRTypes::VT_Code,
+                                   DSRCodedEntryValue("991000","99QIICR","Prostate mpMRI acquisition type"), OFTrue));
       DSRCodedEntryValue seriesType (libraryItem["piradsSeriesType"]["CodeValue"].asCString(),
         libraryItem["piradsSeriesType"]["CodingSchemeDesignator"].asCString(),
         libraryItem["piradsSeriesType"]["CodeMeaning"].asCString());
@@ -155,10 +172,11 @@ int main(int argc, char** argv){
   {
     OFString ccFullPath;
 
-    OFStandard::combineDirAndFilename(ccFullPath,compositeContextDataDir.c_str(),metaRoot["compositeContext"].asCString());
+    OFStandard::combineDirAndFilename(ccFullPath,compositeContextDataDir.c_str(),
+                                      metaRoot["compositeContext"].asCString());
 
     DcmFileFormat ccFileFormat;
-    ccFileFormat.loadFile(ccFullPath);
+    CHECK_COND(ccFileFormat.loadFile(ccFullPath));
     DcmModuleHelpers::copyPatientModule(*ccFileFormat.getDataset(),*dataset);
     DcmModuleHelpers::copyPatientStudyModule(*ccFileFormat.getDataset(),*dataset);
     DcmModuleHelpers::copyGeneralStudyModule(*ccFileFormat.getDataset(),*dataset);
