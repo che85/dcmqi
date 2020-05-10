@@ -13,7 +13,7 @@ TIDQIICRXReader::TIDQIICRXReader(const DSRDocumentTree &tree)
   : DSRDocumentTree(tree) {
     // check for expected template identification
     if (!compareTemplateIdentification("QIICRX", "99QIICR"))
-      CERR << "warning: template identification \"TID QIICRX (99QIICR)\" not found" << OFendl;
+      std::cerr << "warning: template identification \"TID QIICRX (99QIICR)\" not found" << OFendl;
 
 }
 
@@ -86,7 +86,7 @@ Json::Value TIDQIICRXReader::getContentItem(const DSRCodedEntryValue &conceptNam
           const DSRImageTreeNode *, node)->getValue().getSOPInstanceUID().c_str();
           break;
         default:
-          COUT << "Error: failed to find content item" << OFendl;
+          std::cout << "Error: failed to find content item" << OFendl;
       }
     }
   }

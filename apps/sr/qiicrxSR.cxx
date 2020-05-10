@@ -145,6 +145,9 @@ int main(int argc, char** argv){
   DSRDocument doc;
   doc.setTreeFromRootTemplate(report, OFTrue /*expandTree*/);
 
+  if(metaRoot.isMember("SeriesDescription"))
+    doc.setSeriesDescription(metaRoot["SeriesDescription"].asCString());
+
   // iterate over annotated nodes of TID1602 and add codes defining series typed
   {
     DSRDocumentTree &st = doc.getTree();
